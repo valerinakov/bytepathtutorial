@@ -11,6 +11,15 @@ function Projectile:new(area,x,y,opts)
     self.multiplier = opts.multiplier or 1
     self.v = self.v * self.multiplier
 
+    self.staticX = self.x
+    self.staticY = self.y
+    -- Define the laser offset distance
+    self.offsetDistance = 20 -- Adjust this to set how far ahead the laser starts
+
+    -- Calculate the offset using the angle (self.r)
+    self.offsetX = math.cos(self.r) * self.offsetDistance
+    self.offsetY = math.sin(self.r) * self.offsetDistance
+    
     self.damage = 100
 
     self.color = attacks[self.attack].color
@@ -120,6 +129,10 @@ end
 
 function Projectile:update(dt)
     Projectile.super.update(self,dt)
+    -- print(self.offsetX)
+    print(self.offsetX + self.staticX)
+    self.offsetX = math.cos(self.r) * self.offsetDistance
+    self.offsetY = math.sin(self.r) * self.offsetDistance
     -- self.collider:setLinearVelocity(self.v*math.cos(self.r), self.v*math.sin(self.r))
     
     if self.bounce and self.bounce > 0 then
@@ -202,6 +215,10 @@ function Projectile:update(dt)
             self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi - math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi - math.pi/4), {r = self.r - math.pi - math.pi/4, attack = 'Neutral', multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
         end
 
+        if self.attack == 'Explode' then
+            self.area:addGameObject('ExplodeEffect', self.x, self.y, {color = hp_color, w=30*self.s})
+        end
+
         if not object then return end
 
         -- if object:is(Rock) then
@@ -214,7 +231,18 @@ function Projectile:update(dt)
         --     self.dead = true
         -- end
 
-        if object then
+
+        if self.attack == 'Explode' then 
+            local test = self.area:queryCircleArea(self.x,self.y, (30*self.s)/2, {"Rock","Shooter"})
+
+            for k,v in ipairs(test) do
+                if v then
+                    v:hit(self.damage)
+                    self.dead = true
+                    if v.hp <= 0 then current_room.player:onKill() end
+                end
+            end
+        elseif object then
             object:hit(self.damage)
             self.dead = true
             if object.hp <= 0 then current_room.player:onKill() end
@@ -241,7 +269,7 @@ function Projectile:draw()
     if(self.attack == 'Spread') then
         love.graphics.setColor(love.math.colorFromBytes(table.random(all_colors)))
     else
-        love.graphics.setColor(love.math.colorFromBytes(self.color))
+        love.graphics.setColor(love.math.colorFromBytes(default_color))
     end
 
     if self.attack == 'Bounce' then
@@ -250,8 +278,12 @@ function Projectile:draw()
 
     if(self.attack == 'Homing') then
         love.graphics.setColor(love.math.colorFromBytes(default_color))
-        self.area:addGameObject('TrailParticle', self.x , self.y , {parent = self, r = random(2,4), d = random(0.15,0.25), color = skill_point_color})
+        self.area:addGameObject('TrailParticle', self.x, self.y, {parent = self, r = random(2,4), d = random(0.15,0.25), color = skill_point_color})
         Draft:rhombus(self.x,self.y ,self.s*3.5,self.s*3.5,'fill')
+    elseif self.attack == 'Explode' then
+        love.graphics.setColor(love.math.colorFromBytes(default_color))
+        self.area:addGameObject('TrailParticle', self.x, self.y, {parent = self, r = random(2,4), d = random(0.15,0.25), color = hp_color})
+        Draft:rhombus(self.x,self.y ,self.s*4,self.s*4,'fill')
     elseif self.attack == '2Split' then
         love.graphics.setColor(love.math.colorFromBytes(default_color))
         self.area:addGameObject('TrailParticle', self.x , self.y , {parent = self, r = random(1.5,3), d = random(0.15,0.25), color = ammo_color})
@@ -260,6 +292,8 @@ function Projectile:draw()
         love.graphics.setColor(love.math.colorFromBytes(default_color))
         self.area:addGameObject('TrailParticle', self.x, self.y, {parent = self, r = random(1.5,3), d = random(0.15,0.25), color = boost_color})
         Draft:rhombus(self.x,self.y ,self.s*2.5,self.s*2.5,'fill')
+    elseif self.attack == 'Laser' then
+        
     else
         love.graphics.line(self.x - 2*self.s, self.y, self.x, self.y)
         love.graphics.setColor(love.math.colorFromBytes(self.color))
@@ -267,9 +301,24 @@ function Projectile:draw()
     end
     love.graphics.setLineWidth(1)
     love.graphics.pop()
+
+
+    pushRotate(self.staticX,self.staticY, Vector(self.collider:getLinearVelocity()):angleTo())
+    if self.attack == 'Laser' then
+        love.graphics.setColor(love.math.colorFromBytes(default_color))
+        love.graphics.setLineWidth(7)
+        love.graphics.line(self.staticX + self.offsetX, self.staticY +self.offsetY, self.staticX+500, self.staticY )
+        love.graphics.setLineWidth(1)
+    end
+    love.graphics.pop()
 end
 
 function Projectile:die()
     self.dead = true
-    self.area:addGameObject('ProjectileDeathEffect', self.x, self.y, {color = hp_color, w=3*self.s})
+    if self.attack == 'Explode' then
+        self.area:addGameObject('ExplodeEffect', self.x, self.y, {color = hp_color, w=30*self.s})
+    else
+        self.area:addGameObject('ProjectileDeathEffect', self.x, self.y, {color = hp_color, w=3*self.s})
+    end
+
 end

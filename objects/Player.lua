@@ -19,7 +19,7 @@ function Player:new(area,x,y,opts)
     -- self.collider:setMass(0.1)
     self.collider:setCollisionClass('Player')
 
-    self.ship = 'Big Hunter'
+    self.ship = 'Fighter'
     self.polygons = {}
 
 
@@ -110,7 +110,7 @@ function Player:new(area,x,y,opts)
     self.spawn_haste_area_on_hp_pickup_chance = 10
     self.spawn_haste_area_on_sp_pickup_chance = 10
     self.spawn_sp_on_cycle_chance = 10
-    self.barrage_on_kill_chance = 10
+    self.barrage_on_kill_chance = 0
     self.spawn_hp_on_cycle_chance = 0
     self.regain_hp_on_cycle_chance = 0
     self.regain_full_ammo_on_cycle_chance = 0
@@ -127,7 +127,7 @@ function Player:new(area,x,y,opts)
     self.pspd_boost_on_cycle_chance = 0
     self.pspd_inhibit_on_cycle_chance = 0
     self.launch_homing_projectile_while_boosting_chance = 0
-    self.attack_twice_chance = 100
+    self.attack_twice_chance = 0
     self.spawn_double_hp_chance = 0
     self.spawn_double_sp_chance = 0
     self.gain_double_sp_chance = 100 
@@ -271,7 +271,7 @@ function Player:new(area,x,y,opts)
         end
     end)
 
-    self:setAttack('Lightning')
+    self:setAttack('Laser')
     self:setStats()
     self:generateChances()
 
@@ -544,7 +544,7 @@ function Player:shoot()
         -- find closest enemy
         local nearby_enemies = self.area:getAllGameObjectsThat(function(e) 
             for _, enemy in ipairs(enemies) do
-                if e:is(_G[enemy]) and (distance(e.x,e.y,cy,cy) < 64) then
+                if e:is(_G[enemy]) and (distance(e.x,e.y,cx,cy) < 64) then
                     return true
                 end
             end
@@ -559,7 +559,7 @@ function Player:shoot()
         if closest_enemy then
             self.ammo = self.ammo - attacks[self.attack].ammo*self.ammo_consumption_multiplier
             closest_enemy:hit()
-            local x2,y2 = closest_enemy.x, closest_enemy.y1
+            local x2,y2 = closest_enemy.x, closest_enemy.y
             self.area:addGameObject('LightningLine', 0,0, {x1 = x1, y1 = y1, x2 = x2, y2 = y2})
             for i = 1, love.math.random(4,8) do
                 self.area:addGameObject('ExplodeParticle', x1,y1, {color = table.random({default_color, boost_color})})
@@ -568,6 +568,15 @@ function Player:shoot()
                 self.area:addGameObject('ExplodeParticle', x2,y2, {color = table.random({default_color, boost_color})})
             end
         end
+
+    elseif self.attack == 'Explode' then
+        self.ammo = self.ammo - attacks[self.attack].ammo*self.ammo_consumption_multiplier
+        self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r) , self.y + 1.5*d*math.sin(self.r), table.merge({r = self.r, attack = self.attack, multiplier = self.pspd_multiplier.value, projectile_size_multiplier = self.projectile_size_multiplier},mods))
+    elseif self.attack == 'Laser' then
+        self.ammo = self.ammo - attacks[self.attack].ammo*self.ammo_consumption_multiplier
+        self.area:addGameObject('Projectile', self.x, self.y,table.merge({r = self.r, attack = self.attack, multiplier = self.pspd_multiplier.value, projectile_size_multiplier = self.projectile_size_multiplier},mods))
+        slow(0.5,0.25)
+    camera:shake(1, 60, 0.2)
     end
 
     if self.ammo <= 0 then 
