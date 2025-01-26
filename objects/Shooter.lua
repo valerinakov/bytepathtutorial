@@ -42,6 +42,8 @@ end
 
 function Shooter:update(dt)
     Shooter.super.update(self,dt)
+
+    self.hit_by_laser = false
 end
 
 function Shooter:draw()

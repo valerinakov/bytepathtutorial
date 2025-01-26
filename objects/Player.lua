@@ -277,7 +277,7 @@ function Player:new(area,x,y,opts)
         end
     end)
 
-    self:setAttack('2Split')
+    self:setAttack('Laser')
     self:setStats()
     self:generateChances()
 
@@ -595,7 +595,7 @@ function Player:shoot()
         self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r) , self.y + 1.5*d*math.sin(self.r), table.merge({r = self.r, attack = self.attack, multiplier = self.pspd_multiplier.value, projectile_size_multiplier = self.projectile_size_multiplier},mods))
     elseif self.attack == 'Laser' then
         self.ammo = self.ammo - attacks[self.attack].ammo*self.ammo_consumption_multiplier
-        self.area:addGameObject('Projectile', self.x, self.y,table.merge({r = self.r, attack = self.attack, multiplier = self.pspd_multiplier.value, projectile_size_multiplier = self.projectile_size_multiplier},mods))
+        self.area:addGameObject('LaserProjectile', self.x, self.y,table.merge({r = self.r, attack = self.attack, multiplier = self.pspd_multiplier.value, projectile_size_multiplier = self.projectile_size_multiplier},mods))
         slow(0.5,0.25)
     camera:shake(1, 60, 0.2)
     end

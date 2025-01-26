@@ -10,15 +10,6 @@ function Projectile:new(area,x,y,opts)
     self.v = opts.v or 200
     self.multiplier = opts.multiplier or 1
     self.v = self.v * self.multiplier
-
-    self.staticX = self.x
-    self.staticY = self.y
-    -- Define the laser offset distance
-    self.offsetDistance = 20 -- Adjust this to set how far ahead the laser starts
-
-    -- Calculate the offset using the angle (self.r)
-    self.offsetX = math.cos(self.r) * self.offsetDistance
-    self.offsetY = math.sin(self.r) * self.offsetDistance
     
     self.damage = 100
 
@@ -134,10 +125,6 @@ end
 function Projectile:update(dt)
     Projectile.super.update(self,dt)
 
-    self.offsetX = math.cos(self.r) * self.offsetDistance
-    self.offsetY = math.sin(self.r) * self.offsetDistance
-    -- self.collider:setLinearVelocity(self.v*math.cos(self.r), self.v*math.sin(self.r))
-    
     if self.bounce and self.bounce > 0 then
         if self.x < 0 then
             self.r = math.pi - self.r
@@ -307,9 +294,7 @@ function Projectile:draw()
     elseif self.attack == '4Split' then
         love.graphics.setColor(love.math.colorFromBytes(default_color))
         self.area:addGameObject('TrailParticle', self.x, self.y, {parent = self, r = random(1.5,3), d = random(0.15,0.25), color = boost_color})
-        Draft:rhombus(self.x,self.y ,self.s*2.5,self.s*2.5,'fill')
-    elseif self.attack == 'Laser' then
-        
+        Draft:rhombus(self.x,self.y ,self.s*2.5,self.s*2.5,'fill')        
     else
         love.graphics.line(self.x - 2*self.s, self.y, self.x, self.y)
         love.graphics.setColor(love.math.colorFromBytes(self.color))
@@ -318,15 +303,6 @@ function Projectile:draw()
     love.graphics.setLineWidth(1)
     love.graphics.pop()
 
-
-    pushRotate(self.staticX,self.staticY, Vector(self.collider:getLinearVelocity()):angleTo())
-    if self.attack == 'Laser' then
-        love.graphics.setColor(love.math.colorFromBytes(default_color))
-        love.graphics.setLineWidth(7)
-        love.graphics.line(self.staticX + self.offsetX, self.staticY +self.offsetY, self.staticX+500, self.staticY )
-        love.graphics.setLineWidth(1)
-    end
-    love.graphics.pop()
 end
 
 function Projectile:die()

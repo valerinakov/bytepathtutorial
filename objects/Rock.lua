@@ -26,6 +26,8 @@ end
 
 function Rock:update(dt)
     Rock.super.update(self,dt)
+
+    self.hit_by_laser = false
 end
 
 function Rock:draw()
