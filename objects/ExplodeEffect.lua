@@ -9,7 +9,7 @@ function ExplodeEffect:new(area,x,y,opts)
     self.size = 0
 
 
-    self.timer:tween(0.25, self, {size = 75}, 'in-out-cubic', function() 
+    self.timer:tween(0.25, self, {size = 75*current_room.player.area_multiplier}, 'in-out-cubic', function() 
         for i = 1, love.math.random(4,8) do
             self.area:addGameObject('ExplodeParticle', self.x,self.y, {color = hp_color, s = random(8,12), v = random(150,300)})
         end

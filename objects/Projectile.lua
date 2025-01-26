@@ -89,7 +89,11 @@ function Projectile:new(area,x,y,opts)
     end
 
     if self.attack == 'Spin' then
-        self.rv = table.random({random(-2*math.pi, -math.pi), random(math.pi, 2*math.pi)})
+        if current_room.player.fixed_spin_attack_direction then
+            self.rv = random(-2*math.pi, -math.pi)
+        else
+            self.rv = table.random({random(-2*math.pi, -math.pi), random(math.pi, 2*math.pi)})
+        end
         self.timer:after(random(2.4,3.2), function() self:die() end)
         self.timer:every(0.05, function() 
             self.area:addGameObject('ProjectileTrail', self.x, self.y,
@@ -129,8 +133,7 @@ end
 
 function Projectile:update(dt)
     Projectile.super.update(self,dt)
-    -- print(self.offsetX)
-    print(self.offsetX + self.staticX)
+
     self.offsetX = math.cos(self.r) * self.offsetDistance
     self.offsetY = math.sin(self.r) * self.offsetDistance
     -- self.collider:setLinearVelocity(self.v*math.cos(self.r), self.v*math.sin(self.r))
@@ -160,10 +163,16 @@ function Projectile:update(dt)
     end
 
     if self.x < 0 or self.y < 0 or self.x > gw or self.y > gh then
+        local splitorneutral = ''
+        if current_room.player.chances.split_projectiles_split_chance:next() then
+            splitorneutral = self.attack
+        else
+            splitorneutral = 'Neutral'
+        end
         if self.attack == '2Split' or self.attack == '4Split' then
             local d = 1.2*12
-            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi + math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi + math.pi/4), {r = self.r -math.pi + math.pi/4, attack = 'Neutral', multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
-            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi - math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi - math.pi/4), {r = self.r - math.pi - math.pi/4, attack = 'Neutral', multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
+            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi + math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi + math.pi/4), {r = self.r -math.pi + math.pi/4, attack = splitorneutral, multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
+            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi - math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi - math.pi/4), {r = self.r - math.pi - math.pi/4, attack = splitorneutral, multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
         end
     end
 
@@ -202,21 +211,28 @@ function Projectile:update(dt)
 
         local d = 1.2*12
 
+        local splitorneutral = ''
+        if current_room.player.chances.split_projectiles_split_chance:next() then
+            splitorneutral = self.attack
+        else
+            splitorneutral = 'Neutral'
+        end
+
         if self.attack == '2Split' then
-            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r + math.pi/4) , self.y + 1.5*d*math.sin(self.r + math.pi/4), {r = self.r + math.pi/4, attack = 'Neutral', multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
-            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi/4), {r = self.r - math.pi/4, attack = 'Neutral', multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
+            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r + math.pi/4) , self.y + 1.5*d*math.sin(self.r + math.pi/4), {r = self.r + math.pi/4, attack = splitorneutral, multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
+            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi/4), {r = self.r - math.pi/4, attack = splitorneutral, multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
         end
 
         if self.attack == '4Split' then
-            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r + math.pi/4) , self.y + 1.5*d*math.sin(self.r + math.pi/4), {r = self.r + math.pi/4, attack = 'Neutral', multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
-            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi/4), {r = self.r - math.pi/4, attack = 'Neutral', multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
+            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r + math.pi/4) , self.y + 1.5*d*math.sin(self.r + math.pi/4), {r = self.r + math.pi/4, attack = splitorneutral, multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
+            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi/4), {r = self.r - math.pi/4, attack = splitorneutral, multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
         
-            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi + math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi + math.pi/4), {r = self.r - math.pi + math.pi/4, attack = 'Neutral', multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
-            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi - math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi - math.pi/4), {r = self.r - math.pi - math.pi/4, attack = 'Neutral', multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
+            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi + math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi + math.pi/4), {r = self.r - math.pi + math.pi/4, attack = splitorneutral, multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
+            self.area:addGameObject('Projectile', self.x + 1.5*d*math.cos(self.r - math.pi - math.pi/4) , self.y + 1.5*d*math.sin(self.r - math.pi - math.pi/4), {r = self.r - math.pi - math.pi/4, attack = splitorneutral, multiplier = current_room.player.pspd_multiplier.value, projectile_size_multiplier = current_room.player.projectile_size_multiplier, color = ammo_color})
         end
 
         if self.attack == 'Explode' then
-            self.area:addGameObject('ExplodeEffect', self.x, self.y, {color = hp_color, w=30*self.s})
+            self.area:addGameObject('ExplodeEffect', self.x, self.y, {color = hp_color, w=30*self.s*current_room.player.area_multiplier})
         end
 
         if not object then return end
@@ -233,7 +249,7 @@ function Projectile:update(dt)
 
 
         if self.attack == 'Explode' then 
-            local test = self.area:queryCircleArea(self.x,self.y, (30*self.s)/2, {"Rock","Shooter"})
+            local test = self.area:queryCircleArea(self.x,self.y, (30*self.s*current_room.player.area_multiplier)/2, {"Rock","Shooter"})
 
             for k,v in ipairs(test) do
                 if v then
@@ -316,7 +332,7 @@ end
 function Projectile:die()
     self.dead = true
     if self.attack == 'Explode' then
-        self.area:addGameObject('ExplodeEffect', self.x, self.y, {color = hp_color, w=30*self.s})
+        self.area:addGameObject('ExplodeEffect', self.x, self.y, {color = hp_color, w=30*self.s*current_room.player.area_multiplier})
     else
         self.area:addGameObject('ProjectileDeathEffect', self.x, self.y, {color = hp_color, w=3*self.s})
     end
