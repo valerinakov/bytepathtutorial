@@ -6,6 +6,7 @@ function Stat:new(base)
     self.additive = 0
     self.additives = {}
     self.value = self.base*(1 + self.additive)
+
 end
 
 function Stat:update(dt)
@@ -30,4 +31,8 @@ end
 
 function Stat:decrease(percentage)
     table.insert(self.additives, -percentage*0.01)
+end
+
+function Stat:get()
+    return self.value
 end

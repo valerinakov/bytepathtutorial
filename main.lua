@@ -7,6 +7,7 @@ Camera = require 'libraries/hump/camera'
 Physics = require 'libraries/windfield'
 DraftLib = require 'libraries/draft/draft'
 Vector = require 'libraries/hump/vector'
+-- tree = require 'tree'
 
 require 'libraries/utf8/utf8'
 
@@ -44,7 +45,7 @@ function love.load(args)
 
 	current_room = nil
 
-	gotoRoom('Stage')
+	gotoRoom('SkillTree')
 
 	resize(3)
 
@@ -60,6 +61,9 @@ function love.load(args)
     input:bind('right', 'right')
 	input:bind('up', 'up')
     input:bind('down', 'down')
+	input:bind('mouse1', 'mouse1')
+	input:bind('wheelup', 'zoom_in')
+	input:bind('wheeldown', 'zoom_out')
 
 	input:bind('f1', function()
         print("Before collection: " .. collectgarbage("count")/1024)
@@ -76,7 +80,7 @@ function love.update(dt)
 	time = time + dt
 	timer:update(dt)
 	camera:update(dt)
-
+	-- if input:pressed('mouse1') then print('pressed') end
 	if current_room then current_room:update(dt*slow_amount) end
 end
 

@@ -55,6 +55,24 @@ function table.random(t)
     return t[love.math.random(1,#t)]
 end
 
+function printKeys(t, indent)
+    indent = indent or ""
+
+    for key, value in pairs(t) do
+        print(indent .. tostring(key))
+
+        if key == "area" then
+            print('test')
+            printKeys(value, indent .. "  ") -- Recursive call with increased indent
+        end
+
+        if key == "game_objects" then
+            print('test 2')
+            printKeys(value, indent .. "  ") -- Recursive call with increased indent
+        end
+    end
+end
+
 function table.merge(t1,t2)
     local new_table = {}
     for k,v in pairs(t2) do new_table[k] = v end

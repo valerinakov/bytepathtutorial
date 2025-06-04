@@ -23,6 +23,10 @@ attacks = {
     ['Laser'] = {cooldown = 0.8, ammo = 6, abbreviation = 'La', color = hp_color}
 }
 
+attack_names = {'Neutral', 'Double', 'Triple', 'Rapid', 'Spread', 'Back',
+                'Side','Homing','Blast','Spin','Flame','Bounce','2Split',
+                '4Split', 'Lightning','Explode','Laser'}
+
 enemies = {'Rock', 'Shooter'}
 
 default_color = {222, 222, 222}

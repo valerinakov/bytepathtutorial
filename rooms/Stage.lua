@@ -62,14 +62,24 @@ function Stage:draw()
     
         --hp
         local r,g,b = unpack(hp_color)
+        if self.player.energy_shield then
+            r,g,b = unpack({222, 222, 222})
+        end
+        
         local hp, max_hp = self.player.hp, self.player.max_hp
         love.graphics.setColor(love.math.colorFromBytes(r,g,b))
         love.graphics.rectangle('fill', gw/2 - 52, gh - 16, 48*(hp/max_hp), 4)
         love.graphics.setColor(love.math.colorFromBytes(r-32,g-32,b-32))
         love.graphics.rectangle('line', gw/2 - 52, gh -16, 48, 4)
 
-        love.graphics.print('HP', gw/2 - 52 + 24, gh - 24, 0, 1, 1,
-        math.floor(self.font:getWidth('HP')/2), math.floor(self.font:getHeight()/2))
+
+        if self.player.energy_shield then
+            love.graphics.print('SP', gw/2 - 52 + 24, gh - 24, 0, 1, 1,
+            math.floor(self.font:getWidth('SP')/2), math.floor(self.font:getHeight()/2))
+        else
+            love.graphics.print('HP', gw/2 - 52 + 24, gh - 24, 0, 1, 1,
+            math.floor(self.font:getWidth('HP')/2), math.floor(self.font:getHeight()/2))
+        end
 
         love.graphics.print(hp .. '/' .. max_hp, gw/2 - 52 + 24, gh - 6, 0, 1, 1,
         math.floor(self.font:getWidth(hp .. '/' .. max_hp)/2),

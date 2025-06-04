@@ -13,6 +13,8 @@ function Projectile:new(area,x,y,opts)
     
     self.damage = 100
 
+    self.mine = false or opts.mine
+
     self.color = attacks[self.attack].color
 
     self.collider = self.area.world:newCircleCollider(self.x, self.y, self.s)
@@ -67,6 +69,24 @@ function Projectile:new(area,x,y,opts)
         self.timer:tween('slow_fast_first', 0.2, self, {v = initial_v/2}, 'in-out-cubic', function() 
             self.timer:tween('slow_fast_second', 0.3, self, {v = 2*initial_v*current_room.player.projectile_acceleration_multiplier}, 'linear')
         end)
+    end
+
+    if self.mine then
+        self.rv = table.random({random(-12*math.pi, -10*math.pi), random(10*math.pi, 12*math.pi)})
+        self.timer:after(random(8,12), function() 
+            local test = self.area:queryCircleArea(self.x,self.y, (30*self.s*current_room.player.area_multiplier)/2, {"Rock","Shooter"})
+
+            for k,v in ipairs(test) do
+                if v then
+                    v:hit(self.damage)
+                    self.dead = true
+                    if v.hp <= 0 then current_room.player:onKill() end
+                end
+            end
+            self.area:addGameObject('ExplodeEffect', self.x, self.y, {color = hp_color, w=30*self.s*current_room.player.area_multiplier})
+        end)
+
+
     end
 
     if self.attack == 'Blast' then 
@@ -124,6 +144,8 @@ end
 
 function Projectile:update(dt)
     Projectile.super.update(self,dt)
+
+    if self.attack == 'Spin' or self.mine then self.r = self.r + self.rv*dt end
 
     if self.bounce and self.bounce > 0 then
         if self.x < 0 then
